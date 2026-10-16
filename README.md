@@ -1,6 +1,9 @@
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:071B20,50:0E7490,100:0B1220&height=190&section=header&text=Casewire%20SOC&fontSize=42&fontColor=F1F5F9&fontAlignY=38&animation=fadeIn&desc=Planned%20case%20management%20for%20traceable%20security%20investigations&descAlignY=61&descSize=15" alt="Casewire SOC animated project banner" width="100%" />
 </p>
+<h1 align="center">Casewire SOC</h1>
+<p align="center"><img src="https://img.shields.io/badge/Stage-Planning-8B5CF6" alt="Planning stage" /></p>
+
 
 **Turn security events into traceable investigations and response workflows.**
 
