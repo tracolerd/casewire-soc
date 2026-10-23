@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getCases, updateCaseStatus, IncidentCase } from '../services/api';
+import { getCases, updateCaseStatus } from '../services/api';
+import type { IncidentCase } from '../services/api';
 export const Dashboard: React.FC = () => {
-  const casesList = [
+  const casesList: IncidentCase[] = [
     { id: '1', title: 'Test Case 1', status: 'OPEN', severity: 'HIGH', owner: 'Alice', alertGroupId: 'abc', createdAt: new Date().toISOString() },
     { id: '2', title: 'Test Case 2', status: 'IN_PROGRESS', severity: 'MEDIUM', owner: 'Bob', alertGroupId: 'xyz', createdAt: new Date().toISOString() }
   ];
