@@ -12,12 +12,8 @@ public class CaseController {
     }
     @PostMapping("/triage/{alertId}")
     public ResponseEntity<?> triageAlert(@PathVariable UUID alertId) {
-        try {
-            IncidentCase incident = caseService.triageAlertToCase(alertId);
-            return ResponseEntity.ok(incident);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        try { return ResponseEntity.ok(caseService.triageAlertToCase(alertId)); } 
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
     }
     @GetMapping
     public ResponseEntity<?> getAllCases() {
@@ -25,11 +21,27 @@ public class CaseController {
     }
     @PatchMapping("/{caseId}")
     public ResponseEntity<?> updateCase(@PathVariable UUID caseId, @RequestBody CaseUpdateRequest request) {
-        try {
-            IncidentCase updated = caseService.updateCase(caseId, request);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        try { return ResponseEntity.ok(caseService.updateCase(caseId, request)); } 
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+    @PostMapping("/{caseId}/notes")
+    public ResponseEntity<?> addNote(@PathVariable UUID caseId, @RequestBody NoteRequest request) {
+        try { return ResponseEntity.ok(caseService.addNoteToCase(caseId, request)); } 
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+    @PostMapping("/{caseId}/tasks")
+    public ResponseEntity<?> addTask(@PathVariable UUID caseId, @RequestBody TaskRequest request) {
+        try { return ResponseEntity.ok(caseService.addTaskToCase(caseId, request)); } 
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+    @PatchMapping("/tasks/{taskId}/complete")
+    public ResponseEntity<?> completeTask(@PathVariable UUID taskId) {
+        try { return ResponseEntity.ok(caseService.completeTask(taskId)); } 
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+    @GetMapping("/{caseId}/timeline")
+    public ResponseEntity<?> getTimeline(@PathVariable UUID caseId) {
+        try { return ResponseEntity.ok(caseService.getCaseTimeline(caseId)); } 
+        catch (IllegalArgumentException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
     }
 }
