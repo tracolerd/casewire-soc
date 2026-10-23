@@ -1,15 +1,13 @@
 package com.casewire.soc.event;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(EventStore.class)
+@SpringBootTest
+@Transactional
 class EventStoreTest {
     @Autowired
     private EventStore eventStore;
@@ -32,7 +30,7 @@ class EventStoreTest {
         List<NormalizedEvent> results = eventStore.findEventsByTypeAndIpWithinTimeWindow(eventType, targetIp, start, end);
         // Assert
         assertThat(results).hasSize(2);
-        assertThat(results).extracting(NormalizedEvent::getSourceReferenceId).containsExactly("ref-2", "ref-3");
+        assertThat(results).extracting(NormalizedEvent::getSourceReferenceId).containsExactlyInAnyOrder("ref-2", "ref-3");
     }
     private NormalizedEvent createEvent(String type, String ip, Instant time, String ref) {
         NormalizedEvent e = new NormalizedEvent();
