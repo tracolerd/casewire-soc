@@ -15,7 +15,15 @@ class EventImportControllerTest {
     private MockMvc mockMvc;
     @Test
     void shouldImportValidEvent() throws Exception {
-        String payload = "{ "eventTimestamp": "2026-10-23T10:00:00Z", "eventType": "FAILED_LOGIN", "sourceIp": "192.168.1.100", "username": "admin", "sourceReferenceId": "log-12345" }";
+        String payload = """
+            {
+                "eventTimestamp": "2026-10-23T10:00:00Z",
+                "eventType": "FAILED_LOGIN",
+                "sourceIp": "192.168.1.100",
+                "username": "admin",
+                "sourceReferenceId": "log-12345"
+            }
+            """;
         mockMvc.perform(post("/api/events/import")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
@@ -25,7 +33,11 @@ class EventImportControllerTest {
     }
     @Test
     void shouldRejectEventWithoutRequiredFields() throws Exception {
-        String payload = "{ "eventType": "FAILED_LOGIN" }"; // Missing timestamp and sourceReferenceId
+        String payload = """
+            {
+                "eventType": "FAILED_LOGIN"
+            }
+            """;
         mockMvc.perform(post("/api/events/import")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
