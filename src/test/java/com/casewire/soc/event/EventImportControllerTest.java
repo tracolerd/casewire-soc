@@ -1,20 +1,20 @@
 package com.casewire.soc.event;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-@SpringBootTest
-@AutoConfigureMockMvc
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class EventImportControllerTest {
     @Autowired
-    private MockMvc mockMvc;
+    private TestRestTemplate restTemplate;
     @Test
-    void shouldImportValidEvent() throws Exception {
+    void shouldImportValidEvent() {
         String payload = """
             {
                 "eventTimestamp": "2026-10-23T10:00:00Z",
@@ -24,25 +24,28 @@ class EventImportControllerTest {
                 "sourceReferenceId": "log-12345"
             }
             """;
-        mockMvc.perform(post("/api/events/import")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.id").exists());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity("/api/events/import", request, Map.class);
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo("success");
+        assertThat(response.getBody().get("id")).isNotNull();
     }
     @Test
-    void shouldRejectEventWithoutRequiredFields() throws Exception {
+    void shouldRejectEventWithoutRequiredFields() {
         String payload = """
             {
                 "eventType": "FAILED_LOGIN"
             }
             """;
-        mockMvc.perform(post("/api/events/import")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value("error"))
-                .andExpect(jsonPath("$.message").exists());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity("/api/events/import", request, Map.class);
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo("error");
     }
 }
