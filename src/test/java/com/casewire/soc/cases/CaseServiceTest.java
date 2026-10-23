@@ -13,7 +13,9 @@ class CaseServiceTest {
     void shouldCreateNewCaseIfNoneExists() {
         IncidentCaseRepository mockCaseRepo = mock(IncidentCaseRepository.class);
         AlertGroupRepository mockAlertRepo = mock(AlertGroupRepository.class);
-        CaseService service = new CaseService(mockCaseRepo, mockAlertRepo);
+        AnalystNoteRepository mockNoteRepo = mock(AnalystNoteRepository.class);
+        ResponseTaskRepository mockTaskRepo = mock(ResponseTaskRepository.class);
+        CaseService service = new CaseService(mockCaseRepo, mockAlertRepo, mockNoteRepo, mockTaskRepo);
         UUID alertId = UUID.randomUUID();
         AlertGroup alert = new AlertGroup();
         alert.setId(alertId);
@@ -31,7 +33,9 @@ class CaseServiceTest {
     void shouldUpdateCaseStatusAndOwner() {
         IncidentCaseRepository mockCaseRepo = mock(IncidentCaseRepository.class);
         AlertGroupRepository mockAlertRepo = mock(AlertGroupRepository.class);
-        CaseService service = new CaseService(mockCaseRepo, mockAlertRepo);
+        AnalystNoteRepository mockNoteRepo = mock(AnalystNoteRepository.class);
+        ResponseTaskRepository mockTaskRepo = mock(ResponseTaskRepository.class);
+        CaseService service = new CaseService(mockCaseRepo, mockAlertRepo, mockNoteRepo, mockTaskRepo);
         UUID caseId = UUID.randomUUID();
         IncidentCase existingCase = new IncidentCase();
         existingCase.setId(caseId);
