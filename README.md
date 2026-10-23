@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:071B20,45:0E7490,100:0B1220&height=210&section=header&text=Casewire%20SOC&fontSize=48&fontColor=F1F5F9&fontAlignY=37&animation=fadeIn&desc=From%20Security%20Signals%20to%20Traceable%20Investigations&descAlignY=60&descSize=16" alt="Casewire SOC — from security signals to traceable investigations" width="100%" />
+  <img src="assets/casewire-soc-banner.svg" alt="Casewire SOC — deterministic security detection and traceable incident investigations" width="100%" />
 </p>
 
 <h1 align="center">CASEWIRE SOC</h1>
