@@ -246,7 +246,7 @@ If the database already exists, do not drop or recreate it. The current configur
 
 ### 3. Override the sample database credentials
 
-The tracked <code>src/main/resources/application.properties</code> currently specifies a local PostgreSQL URL, username <code>postgres</code>, password <code>postgres</code>, and Hibernate <code>ddl-auto=update</code>. These are development placeholders, not safe deployment defaults.
+The tracked <code>src/main/resources/application.properties</code> now reads the datasource password from <code>SPRING_DATASOURCE_PASSWORD</code> instead of committing a default password. The local URL/username remain configurable; Hibernate <code>ddl-auto=update</code> is still only appropriate for this prototype.
 
 Override them in the same PowerShell session used to run Maven. Replace the sample password with the password for your local database role:
 
@@ -320,7 +320,7 @@ This section is intentionally direct: **Casewire SOC is a local portfolio demons
 
 ### Configuration and access control
 
-- The tracked application properties file contains a sample database username/password and enables Hibernate schema auto-update. Override local credentials through environment variables; before any shared deployment, remove unsafe defaults, externalize secrets, and use an explicit schema migration strategy.
+- The tracked application properties file requires the database password to come from the environment and enables Hibernate schema auto-update. Keep credentials out of source control; before any shared deployment, enforce a proper migration strategy and review the broader authentication/authorization gaps.
 - No authentication, authorization, user provisioning, or role-based access control is implemented. API endpoints are not protected by an identity layer.
 - Analyst-note authors and case owners are free-form request fields, not verified identities.
 - There is no deployment profile, production secret manager setup, or HTTPS/reverse-proxy hardening guide.
