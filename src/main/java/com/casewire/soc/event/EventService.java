@@ -90,7 +90,7 @@ public class EventService {
             throw new IllegalArgumentException(field + " must be a valid IPv4 or IPv6 literal");
         }
 
-        if (value.contains(".")) {
+        if (!value.contains(":")) {
             String[] octets = value.split("\\.", -1);
             if (octets.length != 4) {
                 throw new IllegalArgumentException(field + " must be a valid IPv4 or IPv6 literal");
@@ -109,10 +109,6 @@ public class EventService {
                 }
             }
             return;
-        }
-
-        if (!value.contains(":")) {
-            throw new IllegalArgumentException(field + " must be a valid IPv4 or IPv6 literal");
         }
         try {
             if (!(InetAddress.getByName(value) instanceof Inet6Address)) {
