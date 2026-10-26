@@ -32,7 +32,7 @@ public class BruteForceDetectionRule {
             AlertGroup alert = new AlertGroup();
             alert.setRuleName("Brute Force Authentication Detected");
             alert.setGroupingKey(sourceIp);
-            alert.setTriggeredAt(Instant.now());
+            alert.setTriggeredAt(endTime);
             alert.setDescription(String.format("Detected %d FAILED_LOGIN events from IP: %s within 5 minutes.", recentFailures.size(), sourceIp));
             return Optional.of(alertRepository.save(alert));
         }
