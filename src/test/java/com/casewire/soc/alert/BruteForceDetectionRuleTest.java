@@ -19,7 +19,8 @@ class BruteForceDetectionRuleTest {
         NormalizedEvent latestEvent = new NormalizedEvent();
         latestEvent.setEventType("FAILED_LOGIN");
         latestEvent.setSourceIp("192.168.1.50");
-        latestEvent.setEventTimestamp(Instant.now());
+        Instant eventTime = Instant.parse("2026-10-23T09:30:00Z");
+        latestEvent.setEventTimestamp(eventTime);
         // Mock 3 events found in DB
         when(mockStore.findEventsByTypeAndIpWithinTimeWindow(any(), any(), any(), any()))
                 .thenReturn(List.of(new NormalizedEvent(), new NormalizedEvent(), new NormalizedEvent()));
@@ -27,6 +28,7 @@ class BruteForceDetectionRuleTest {
         Optional<AlertGroup> alert = rule.evaluate(latestEvent);
         assertTrue(alert.isPresent());
         assertEquals("192.168.1.50", alert.get().getGroupingKey());
+        assertEquals(eventTime, alert.get().getTriggeredAt());
         assertTrue(alert.get().getDescription().contains("Detected 3"));
     }
     @Test
