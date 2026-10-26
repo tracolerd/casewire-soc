@@ -29,6 +29,18 @@ public class BruteForceDetectionRule {
         List<NormalizedEvent> recentFailures = eventStore.findEventsByTypeAndIpWithinTimeWindow(
                 TARGET_EVENT_TYPE, sourceIp, startTime, endTime);
         if (recentFailures.size() >= THRESHOLD) {
+            // Do not create a new alert for every additional failure in the
+            // same suppression window. Use source event time for deterministic
+            // replay; the database query bounds the lookup to this IP/rule.
+            Optional<AlertGroup> existingAlert = alertRepository
+                    .findFirstByRuleNameAndGroupingKeyAndTriggeredAtGreaterThanEqualAndTriggeredAtLessThanEqualOrderByTriggeredAtDesc(
+                            "Brute Force Authentication Detected",
+                            sourceIp,
+                            startTime,
+                            endTime.plus(WINDOW_DURATION));
+            if (existingAlert.isPresent()) {
+                return Optional.empty();
+            }
             AlertGroup alert = new AlertGroup();
             alert.setRuleName("Brute Force Authentication Detected");
             alert.setGroupingKey(sourceIp);

@@ -3,6 +3,7 @@ import com.casewire.soc.event.EventStore;
 import com.casewire.soc.event.NormalizedEvent;
 import org.junit.jupiter.api.Test;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 class BruteForceDetectionRuleTest {
     @Test
     void shouldTriggerAlertWhenThresholdExceeded() {
@@ -31,6 +34,31 @@ class BruteForceDetectionRuleTest {
         assertEquals(eventTime, alert.get().getTriggeredAt());
         assertTrue(alert.get().getDescription().contains("Detected 3"));
     }
+    @Test
+    void shouldSuppressDuplicateAlertWithinTheFiveMinuteWindow() {
+        EventStore mockStore = mock(EventStore.class);
+        AlertGroupRepository mockRepo = mock(AlertGroupRepository.class);
+        BruteForceDetectionRule rule = new BruteForceDetectionRule(mockStore, mockRepo);
+        NormalizedEvent latestEvent = new NormalizedEvent();
+        latestEvent.setEventType("FAILED_LOGIN");
+        latestEvent.setSourceIp("192.168.1.50");
+        Instant eventTime = Instant.parse("2026-10-23T09:32:00Z");
+        latestEvent.setEventTimestamp(eventTime);
+        when(mockStore.findEventsByTypeAndIpWithinTimeWindow(any(), any(), any(), any()))
+                .thenReturn(List.of(new NormalizedEvent(), new NormalizedEvent(), new NormalizedEvent()));
+        when(mockRepo.findFirstByRuleNameAndGroupingKeyAndTriggeredAtGreaterThanEqualAndTriggeredAtLessThanEqualOrderByTriggeredAtDesc(
+                "Brute Force Authentication Detected",
+                "192.168.1.50",
+                eventTime.minus(Duration.ofMinutes(5)),
+                eventTime.plus(Duration.ofMinutes(5))))
+                .thenReturn(Optional.of(new AlertGroup()));
+
+        Optional<AlertGroup> result = rule.evaluate(latestEvent);
+
+        assertTrue(result.isEmpty());
+        verify(mockRepo, never()).save(any(AlertGroup.class));
+    }
+
     @Test
     void shouldNotTriggerAlertIfBelowThreshold() {
         EventStore mockStore = mock(EventStore.class);
