@@ -1,37 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { getCases, updateCaseStatus } from '../services/api';
 import type { IncidentCase } from '../services/api';
+
 export const Dashboard: React.FC = () => {
-  const casesList: IncidentCase[] = [
-    { id: '1', title: 'Test Case 1', status: 'OPEN', severity: 'HIGH', owner: 'Alice', alertGroupId: 'abc', createdAt: new Date().toISOString() },
-    { id: '2', title: 'Test Case 2', status: 'IN_PROGRESS', severity: 'MEDIUM', owner: 'Bob', alertGroupId: 'xyz', createdAt: new Date().toISOString() }
-  ];
-  const [cases, setCases] = useState<IncidentCase[]>(casesList);
+  const [cases, setCases] = useState<IncidentCase[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
   const fetchCases = async () => {
+    setLoading(true);
+    setErrorMessage('');
     try {
-      setLoading(true);
+      // The API is the source of truth. Never substitute demo records when it
+      // fails or returns an empty list.
       const data = await getCases();
-      if (data && data.length > 0) {
-        setCases(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch cases from backend, using default mock preview.", err);
+      setCases(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch incident cases from the backend.', error);
+      setCases([]);
+      setErrorMessage('Could not load live incident cases. Check the API connection and try again.');
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    fetchCases();
+    void fetchCases();
   }, []);
+
   const handleStatusChange = async (caseId: string, newStatus: string) => {
+    setErrorMessage('');
     try {
       await updateCaseStatus(caseId, newStatus);
-      fetchCases();
-    } catch (err) {
-      console.error("Failed to update status", err);
+      await fetchCases();
+    } catch (error) {
+      console.error('Failed to update case status.', error);
+      setErrorMessage('Could not update this incident case. The displayed status was not changed.');
     }
   };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
       <header className="mb-8 border-b border-slate-800 pb-4 flex justify-between items-center">
@@ -39,13 +46,19 @@ export const Dashboard: React.FC = () => {
           <h1 className="text-3xl font-bold tracking-tight text-emerald-400">Casewire SOC</h1>
           <p className="text-sm text-slate-400 mt-1">Incident Case Management & Triage Dashboard</p>
         </div>
-        <button 
-          onClick={fetchCases}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-sm font-medium transition"
+        <button
+          onClick={() => void fetchCases()}
+          disabled={loading}
+          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white px-4 py-2 rounded text-sm font-medium transition"
         >
           {loading ? 'Refreshing...' : 'Refresh Cases'}
         </button>
       </header>
+      {errorMessage && (
+        <div role="alert" className="mb-5 rounded border border-red-800 bg-red-950 p-4 text-red-200">
+          {errorMessage}
+        </div>
+      )}
       <div className="bg-slate-900 border border-slate-800 rounded-lg shadow-xl overflow-hidden">
         <div className="p-4 border-b border-slate-800 font-semibold text-slate-300">Active Incident Cases</div>
         <div className="overflow-x-auto">
@@ -81,14 +94,14 @@ export const Dashboard: React.FC = () => {
                   <td className="p-4 text-slate-400">{c.owner || 'Unassigned'}</td>
                   <td className="p-4 text-slate-500">{new Date(c.createdAt).toLocaleString()}</td>
                   <td className="p-4 flex gap-2">
-                    <button 
-                      onClick={() => handleStatusChange(c.id, 'IN_PROGRESS')}
+                    <button
+                      onClick={() => void handleStatusChange(c.id, 'IN_PROGRESS')}
                       className="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded text-xs transition"
                     >
                       In Progress
                     </button>
-                    <button 
-                      onClick={() => handleStatusChange(c.id, 'RESOLVED')}
+                    <button
+                      onClick={() => void handleStatusChange(c.id, 'RESOLVED')}
                       className="bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1 rounded text-xs transition"
                     >
                       Resolve
@@ -96,9 +109,16 @@ export const Dashboard: React.FC = () => {
                   </td>
                 </tr>
               ))}
-              {cases.length === 0 && (
+              {!loading && cases.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-slate-500">No incident cases found.</td>
+                  <td colSpan={6} className="p-6 text-center text-slate-500">
+                    {errorMessage ? 'Live case data is unavailable.' : 'No live incident cases found.'}
+                  </td>
+                </tr>
+              )}
+              {loading && cases.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-slate-500">Loading live incident cases…</td>
                 </tr>
               )}
             </tbody>
