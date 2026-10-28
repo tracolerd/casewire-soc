@@ -413,3 +413,7 @@ This project is independently built and maintained by Nurul Faiyaz.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+---
+
+<p align="center"><sub>Portfolio catalog · Project 08 of 22 · <a href="https://github.com/tracolerd">Nurul Faiyaz</a></sub></p>
